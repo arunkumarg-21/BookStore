@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyBottomNavigationBar(),
+      home: Scaffold(body: MyBottomNavigationBar()),
     );
   }
 }
@@ -26,13 +26,12 @@ class MyBottomNavigationBar extends StatefulWidget {
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   int _currentIndex = 0;
-  final List<Widget> _children = [MyHomePage(), DetailsScreen(), UserProfile()];
+  final List<Widget> _children = [MyHomePage(), CartScreen(), UserProfile()];
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
         body: _children[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           items: [
@@ -45,12 +44,14 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
           ],
           onTap: onTapped,
         ),
-      ),
     );
   }
 
   void onTapped(int value) {
-    switch (value) {
+    setState(() {
+      _currentIndex = value;
+    });
+    /*switch (value) {
       case 0:
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => MyHomePage()));
@@ -58,12 +59,12 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
       case 1:
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => CartScreen()));
-        break;
+        break;*/
       /*case 2:
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => UserProfile()));
-        break;*/
+        break;
 
-    }
+    }*/
   }
 }

@@ -1,4 +1,5 @@
 
+import 'package:book_store/main.dart';
 import 'package:book_store/shared_preference.dart';
 import 'package:book_store/user.dart';
 import 'package:flutter/cupertino.dart';
@@ -143,12 +144,11 @@ class RegisterState extends State<Register>{
                                        _formKey.currentState.save();
 
                                        User user = User(userName: name,userEmail: email,userPassword: password);
-
-                                       if(dbHelper.saveUser(user) != null){
+                                        var id = dbHelper.saveUser(user);
+                                       if(id != null){
                                          MySharedPreference sharedPref = MySharedPreference();
                                          sharedPref.saveUser(name, password);
-                                         dbHelper.saveUser(user);
-                                         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => MyHomePage()),(Route<dynamic> route) => false);
+                                         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => MyBottomNavigationBar()),(Route<dynamic> route) => false);
                                        }
 
                                       }

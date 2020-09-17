@@ -21,13 +21,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     dbHelper = DBHelper();
 
-    dbHelper.getBooks().then((value){
-      if(value == null){
-        insert();
-      }
-    }).catchError((e){
-      print(e);
-    });
   }
 
   void insert() {
@@ -191,6 +184,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     var size = MediaQuery.of(context).size;
+    dbHelper.getBooks().then((value){
+      if(value == null){
+        setState(() {
+          insert();
+        });
+      }
+    }).catchError((e){
+      print(e);
+    });
 
     final double itemWidth = size.width /2;
     final double itemHeight = (size.height - kToolbarHeight -24)/2;

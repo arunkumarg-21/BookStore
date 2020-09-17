@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import './book.dart';
 import './db_helper.dart';
 import './login.dart';
+import 'orders_screen.dart';
 
 class DetailsScreen extends StatelessWidget {
   final Book book;
@@ -74,22 +75,21 @@ class DetailsScreen extends StatelessWidget {
                         textColor: Colors.white,
                         elevation: 2,
                         onPressed: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(
-                                  builder: (context) => Login()));
                           final sharedPref = MySharedPreference();
-                          sharedPref.getUser().then((value) {
-                            if (value.contains('noData')) {
-                              Navigator.push(context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Login()));
+                          String name;
+                          Future.delayed(Duration(seconds: 2),() => sharedPref.getUser().then((value) {
+                            name = value;
+                            if (name.contains('noData')) {
+                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Login()), (route) => false);
                             } else {
+                              var id = List<int>();
+                              id.add(book.bookId);
+                              dbHelper.insertOrder(id, name);
                               Navigator.push(context,
                                   MaterialPageRoute(
-                                      builder: (context) => MyHomePage()));
+                                      builder: (context) => OrdersPage()));
                             }
-                          }
-                          );
+                          }));
                         },
                         child: Text('BUY NOW',
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -103,7 +103,14 @@ class DetailsScreen extends StatelessWidget {
                         icon: Icon(Icons.add_shopping_cart,
                             color: Colors.blueGrey),
                         onPressed: () {
-                          dbHelper.insertCart(book);
+                          final sharedPref = MySharedPreference();
+                          String name;
+                          Future.delayed(Duration(seconds: 2),() => sharedPref.getUser().then((value) {
+                            name = value;
+                            print('pressed==$name====');
+                            dbHelper.insertCart(book.bookId,name);
+                          }
+                          ));
                         },
                       ),
                     ),

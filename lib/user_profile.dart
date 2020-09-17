@@ -76,36 +76,33 @@ class _UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: Container(
-        margin: EdgeInsets.fromLTRB(20, 24, 20, 20),
-        child: ListView(
-          scrollDirection: Axis.vertical,
-          children: [
-            Container(
-              height: 300,
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                      decoration: BoxDecoration(color: Colors.grey),
-                      child: Column(children: [Text('$name'), Text('$email',style: TextStyle(fontSize: 12),)])),
-                  Container(
-                    width: 80,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.cyanAccent),
-                  )
-                ],
-              ),
+      body: ListView(
+        scrollDirection: Axis.vertical,
+        children: [
+          Container(
+            height: 300,
+            decoration: BoxDecoration(color: Colors.grey),
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                    child: Column(children: [Container( padding:EdgeInsets.only(bottom: 8) ,child: Text('$name')), Text('$email',style: TextStyle(fontSize: 8),)])),
+                Container(
+                  width: 80,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.cyanAccent),
+                )
+              ],
             ),
-            Container(
-              height: 50,
-              margin: EdgeInsets.only(top: 20, left: 20),
-              color: Colors.amberAccent,
-            ),
-          ],
-        ),
+          ),
+          Container(
+            margin: EdgeInsets.fromLTRB(10,10, 10,10),
+            color: Colors.amberAccent,
+            child: Text('The button section contains 3 columns that use the same layout—an icon over a row of text.'
+                ' The columns in this row are evenly spaced, and the text and icons are painted with the primary color.'),
+          ),
+        ],
       ),
     );
   }

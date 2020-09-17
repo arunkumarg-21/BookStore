@@ -5,6 +5,8 @@ class MySharedPreference{
 
 
 
+
+
   Future<void> saveUser(String name,String password) async{
     final sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString('name', name);
@@ -12,12 +14,11 @@ class MySharedPreference{
   }
 
   Future<String> getUser() async{
+    print("getUser===");
     final sharedPreferences = await SharedPreferences.getInstance();
     String userCred;
-    userCred=sharedPreferences.getString('name');
-    if(userCred == null){
-      return "noData";
-    }
+    userCred = (sharedPreferences.getString('name')??"noData");
+    print('getUser---$userCred====');
     return userCred;
   }
 }
