@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'package:book_store/cartlist.dart';
 import 'package:book_store/user.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -16,6 +17,7 @@ class DBHelper {
   static const String PASSWORD = 'password';
   static const String RATING = 'rating';
   static const String IMAGE = 'image';
+  static const String QUANTITY = 'quantity';
   static const String BOOK_TABLE = 'Books';
   static const String USER_TABLE = 'Users';
   static const String USER_ADDRESS = 'Address';
@@ -45,8 +47,8 @@ class DBHelper {
 
   _onCreate(Database db,int version) async {
     await db.execute("CREATE TABLE $BOOK_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$DESCRIPTION TEXT,$PRICE INTEGER,$RATING INTEGER,$IMAGE TEXT)");
-    await db.execute("CREATE TABLE $CART_TABLE($CART_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT)");
-    await db.execute("CREATE TABLE $ORDER_TABLE($ORDER_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT)");
+    await db.execute("CREATE TABLE $CART_TABLE($CART_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
+    await db.execute("CREATE TABLE $ORDER_TABLE($ORDER_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
     await db.execute("CREATE TABLE $USER_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$EMAIL TEXT,$PASSWORD TEXT,$USER_ADDRESS TEXT)");
   }
 
@@ -62,23 +64,37 @@ class DBHelper {
     return id;
   }
 
-  Future<int> insertCart(int id,String name) async{
+  Future<int> insertCart(int id,String name,int quantity) async{
     var dbClient = await db;
     int i;
-    List<Map> map = await dbClient.query(CART_TABLE,where: "$BOOK_ID = ?",whereArgs: [id]);
+    List<Map> map = await dbClient.query(CART_TABLE,where: "$BOOK_ID = ? and $USER_NAME = ?",whereArgs: [id,name]);
+    print(map);
     if(map.isEmpty) {
        i = await dbClient.rawInsert(
-          "INSERT INTO $CART_TABLE($BOOK_ID,$USER_NAME) VALUES(?,?)",
-          [id, name]);
+          "INSERT INTO $CART_TABLE($BOOK_ID,$USER_NAME,$QUANTITY) VALUES(?,?,?)",
+          [id, name,quantity]);
     }
     return i;
+  }
+
+  Future<String> getUserAddress(String name) async{
+    var dbClient = await db;
+    var address;
+    List<Map> map = await dbClient.query(USER_TABLE,where: "$NAME = ?",whereArgs: [name]);
+    if(map.isEmpty){
+      return "noData";
+    }
+    map.forEach((element) {
+      address = element[USER_ADDRESS];
+    });
+    return address;
   }
 
   insertOrder(List<int> id,String name) async{
     var dbClient = await db;
     for(int i=0;i<id.length;i++){
       var curId = id[i];
-      List<Map> map = await dbClient.query(ORDER_TABLE,where: "$BOOK_ID = ?",whereArgs: [curId]);
+      List<Map> map = await dbClient.query(ORDER_TABLE,where: "$BOOK_ID = ? and $USER_NAME = ?",whereArgs: [curId,name]);
       if(map.isEmpty) {
         await dbClient.rawInsert(
             'INSERT INTO $ORDER_TABLE($BOOK_ID,$USER_NAME) VALUES(?,?)',
@@ -87,7 +103,12 @@ class DBHelper {
     }
   }
 
-   deleteCart(int id) async{
+   deleteCart(int id,String name) async{
+    var dbClient = await db;
+    await dbClient.delete(CART_TABLE,where: "$BOOK_ID = ? and $USER_NAME = ?",whereArgs: [id,name]);
+  }
+
+  deleteCart1(int id) async{
     var dbClient = await db;
     await dbClient.delete(CART_TABLE,where: "$BOOK_ID = ?",whereArgs: [id]);
   }
@@ -98,44 +119,72 @@ class DBHelper {
     User user;
       map.forEach((element) {
         user = User(
-            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email']);
+            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email'],userAddress: element[USER_ADDRESS]);
       });
     return user;
   }
 
-  Future<List<Book>> getCart(String name) async{
-    print('cart===');
+  Future<int> updateUser(User user) async{
+    var dbClient  = await db;
+    int id = await dbClient.update(USER_TABLE, user.userToMap(),where: 'id = ?',whereArgs: [user.userId]);
+    return id;
+  }
+
+  Future<String> getQuantity(int bookId,String name) async{
     var dbClient = await db;
-    List<Map> maps = await dbClient.rawQuery("SELECT $BOOK_TABLE.* FROM $BOOK_TABLE LEFT JOIN $CART_TABLE ON $BOOK_TABLE.$ID = $CART_TABLE.$BOOK_ID WHERE $USER_NAME = ?",[name]);
-    print(maps);
+    List<Map> map = await dbClient.rawQuery("SELECT $QUANTITY FROM $CART_TABLE WHERE $BOOK_ID = ? AND $USER_NAME = ?",[bookId,name]);
+    map.forEach((element) {
+      print('quantity====${element[QUANTITY]}');
+      return element[QUANTITY].toString();
+    });
+  }
+
+  Future<int> getTotal(String name) async{
+    var dbClient = await db;
+    int total=0;
+    List<Map> map = await dbClient.rawQuery("SELECT $BOOK_TABLE.$PRICE,$CART_TABLE.$QUANTITY FROM $BOOK_TABLE LEFT JOIN $CART_TABLE ON $BOOK_TABLE.$ID = $CART_TABLE.$BOOK_ID WHERE $USER_NAME = ?",[name]);
+    map.forEach((element) {
+      total = total + element[PRICE]*element[QUANTITY];
+    });
+    return total;
+  }
+
+  Future<List<CartList>> getCart(String name) async{
+    var dbClient = await db;
+    List<Map> maps = await dbClient.rawQuery("SELECT $BOOK_TABLE.*,$CART_TABLE.$QUANTITY FROM $BOOK_TABLE LEFT JOIN $CART_TABLE ON $BOOK_TABLE.$ID = $CART_TABLE.$BOOK_ID WHERE $USER_NAME = ?",[name]);
     if(maps.length > 0){
       return List.generate(maps.length, (index) =>
-          Book(
+          CartList(
+            quantity: maps[index]['$QUANTITY'],
+              book: Book(
               bookId: maps[index]['id'],
               bookName: maps[index]['name'],
               bookDescription: maps[index]['description'],
               bookPrice: maps[index]['price'],
               rating: maps[index]['rating'],
               image: maps[index]['image']
+              )
           ));
     }else{
       return null;
     }
   }
 
-  Future<List<Book>> getOrder(String name) async{
-    print('order===');
+  Future<List<CartList>> getOrder(String name) async{
     var dbClient = await db;
-    List<Map> maps = await dbClient.rawQuery("SELECT $BOOK_TABLE.* FROM $BOOK_TABLE LEFT JOIN $ORDER_TABLE ON $BOOK_TABLE.$ID = $ORDER_TABLE.$BOOK_ID WHERE $USER_NAME = ?",[name]);
+    List<Map> maps = await dbClient.rawQuery("SELECT $BOOK_TABLE.*,$ORDER_TABLE.$QUANTITY FROM $BOOK_TABLE LEFT JOIN $ORDER_TABLE ON $BOOK_TABLE.$ID = $ORDER_TABLE.$BOOK_ID WHERE $USER_NAME = ?",[name]);
     if(maps.length > 0){
       return List.generate(maps.length, (index) =>
-          Book(
-              bookId: maps[index]['id'],
-              bookName: maps[index]['name'],
-              bookDescription: maps[index]['description'],
-              bookPrice: maps[index]['price'],
-              rating: maps[index]['rating'],
-              image: maps[index]['image']
+          CartList(
+              quantity: maps[index]['$QUANTITY'],
+              book: Book(
+                  bookId: maps[index]['id'],
+                  bookName: maps[index]['name'],
+                  bookDescription: maps[index]['description'],
+                  bookPrice: maps[index]['price'],
+                  rating: maps[index]['rating'],
+                  image: maps[index]['image']
+              )
           ));
     }else{
       return null;

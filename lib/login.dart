@@ -137,14 +137,15 @@ class LoginState extends State<Login> {
                                   var Name = value.userName;
                                   var Password = value.userPassword;
                                   if (Name == name && password == Password) {
-                                    sharedPref.saveUser(name,password);
+                                    sharedPref.saveUser(name, password);
                                     Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => MyBottomNavigationBar()),
+                                            builder: (context) =>
+                                                MyBottomNavigationBar()),
                                         (route) => false);
                                   }
-                                }else {
+                                } else {
                                   showAlertDialog(context);
                                 }
                               });
@@ -206,29 +207,29 @@ class LoginState extends State<Login> {
   }
 }
 
-showAlertDialog(BuildContext context) {
-  // Create button
- /* Widget okButton = FlatButton(
-    child: Text("OK"),
-    onPressed: () {
-      Navigator.pop(context);
-    },
-  );*/
-
-  // Create AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: Text("Simple Alert"),
-    content: Text("This is an alert message."),
-    /*actions: [
-      okButton,
-    ],*/
-  );
-
-  // show the dialog
-  showDialog(
+showAlertDialog(BuildContext context) async {
+  await showDialog<String>(
     context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
+    child: AlertDialog(
+      contentPadding: const EdgeInsets.all(16.0),
+      content: Row(
+        children: <Widget>[
+            Expanded(child: Text('Invalid Credentials')),
+          //Text('Enter valid user name and Password')
+        ],
+      ),
+      actions: <Widget>[
+        new FlatButton(
+            child: const Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
+        new FlatButton(
+            child: const Text('OK'),
+            onPressed: () {
+             Navigator.pop(context);
+            })
+      ],
+    ),
   );
 }

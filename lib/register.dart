@@ -109,7 +109,7 @@ class RegisterState extends State<Register>{
                                 margin: EdgeInsets.only(top: 10,bottom: 10),
                                 child: TextFormField(
                                   controller: emailController,
-                                  validator: (val) => RegExp(r'^.+@[a-zA-Z]+\.{1}[a-zA-Z]+(\.{0,1}[a-zA-Z]+)$').hasMatch(val) || val.isNotEmpty? null : 'Enter a valid email',
+                                  validator: (val) => RegExp(r'^.+@[a-zA-Z]+\.{1}[a-zA-Z]+(\.{0,1}[a-zA-Z]+)$').hasMatch(val) && val.isNotEmpty? null : 'Enter a valid email',
                                   onSaved: (val) => email = val,
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder(

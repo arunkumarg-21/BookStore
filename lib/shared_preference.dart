@@ -14,25 +14,15 @@ class MySharedPreference{
   }
 
   Future<String> getUser() async{
-    print("getUser===");
     final sharedPreferences = await SharedPreferences.getInstance();
     String userCred;
     userCred = (sharedPreferences.getString('name')??"noData");
-    print('getUser---$userCred====');
+    print('username===$userCred');
     return userCred;
   }
-}
 
-/*
-class SharedPreference{
-
-
-  saveUser(String name,String password) async {
-    SharedPreferences sharedPreference = await SharedPreferences.getInstance();
-    sharedPreference.setString('password', password);
-    return sharedPreference.setString('name', name);
+  logOut() async{
+    final sharedPreference = await SharedPreferences.getInstance();
+    await sharedPreference.clear();
   }
-
-
-
-}*/
+}

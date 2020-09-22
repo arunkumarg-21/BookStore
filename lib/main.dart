@@ -26,24 +26,30 @@ class MyBottomNavigationBar extends StatefulWidget {
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   int _currentIndex = 0;
+
+  /*final homeScreen = GlobalKey<NavigatorState>();
+  final cartScreen = GlobalKey<NavigatorState>();
+  final profileScreen = GlobalKey<NavigatorState>();*/
+
   final List<Widget> _children = [MyHomePage(), CartScreen(), UserProfile()];
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _children[_currentIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home), title: Text('Home')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart), title: Text('Cart')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.account_circle), title: Text('Profile'))
-          ],
-          onTap: onTapped,
-        ),
+      body: _children[_currentIndex],
+
+      bottomNavigationBar: BottomNavigationBar(
+        elevation: 3,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home,color: _currentIndex == 0? Colors.blue : Colors.grey,), title: Text('Home',style: TextStyle(color: _currentIndex == 0? Colors.blue : Colors.grey ),)),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart,color: _currentIndex == 1? Colors.blue : Colors.grey), title: Text('Cart',style: TextStyle(color: _currentIndex == 1? Colors.blue : Colors.grey ))),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle,color: _currentIndex == 2? Colors.blue : Colors.grey), title: Text('Profile',style: TextStyle(color: _currentIndex == 2? Colors.blue : Colors.grey )))
+        ],
+        onTap: onTapped,
+      ),
     );
   }
 
@@ -60,7 +66,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => CartScreen()));
         break;*/
-      /*case 2:
+    /*case 2:
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => UserProfile()));
         break;

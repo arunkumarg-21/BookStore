@@ -1,5 +1,5 @@
-import 'package:book_store/home.dart';
 import 'package:book_store/shared_preference.dart';
+import 'package:book_store/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import './book.dart';
@@ -7,18 +7,27 @@ import './db_helper.dart';
 import './login.dart';
 import 'orders_screen.dart';
 
-class DetailsScreen extends StatelessWidget {
+class DetailsScreen extends StatefulWidget {
   final Book book;
 
   DetailsScreen({this.book});
 
   @override
+  _DetailsScreenState createState() => _DetailsScreenState();
+}
+
+class _DetailsScreenState extends State<DetailsScreen> {
+  var user = User();
+  var dbHelper = DBHelper();
+  var quantity = 1;
+
+  TextEditingController addressController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
     var dbHelper = DBHelper();
     return Scaffold(
-      appBar: AppBar(
-        title: Text('BookStore'),
-      ),
+      appBar: AppBar(title: Text('BookStore')),
       body: Container(
         margin: EdgeInsets.fromLTRB(20, 24, 20, 20),
         child: ListView(
@@ -30,8 +39,8 @@ class DetailsScreen extends StatelessWidget {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   image: DecorationImage(
-                      image: book.image != null
-                          ? AssetImage(book.image)
+                      image: widget.book.image != null
+                          ? AssetImage(widget.book.image)
                           : AssetImage('assets/book1'),
                       fit: BoxFit.fill)),
             ),
@@ -41,14 +50,14 @@ class DetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(book.bookName,
+                  Text(widget.book.bookName,
                       textAlign: TextAlign.left,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   Padding(
                     padding: EdgeInsets.only(top: 15),
                     child: Text(
-                      book.bookDescription,
+                      widget.book.bookDescription,
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           color: Colors.grey[800],
@@ -57,9 +66,9 @@ class DetailsScreen extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 20),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
                     child: Text(
-                      'Price: ${book.bookPrice.toString()}',
+                      'Price: ${widget.book.bookPrice.toString()}',
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           color: Colors.black,
@@ -67,33 +76,49 @@ class DetailsScreen extends StatelessWidget {
                           fontSize: 18),
                     ),
                   ),
+                  Padding(padding:EdgeInsets.symmetric(vertical: 10),child: Text('Quantity:')),
                   Row(children: [
                     Expanded(
                       flex: 3,
-                      child: RaisedButton(
-                        color: Colors.blueGrey,
-                        textColor: Colors.white,
-                        elevation: 2,
-                        onPressed: () {
-                          final sharedPref = MySharedPreference();
-                          String name;
-                          Future.delayed(Duration(seconds: 2),() => sharedPref.getUser().then((value) {
-                            name = value;
-                            if (name.contains('noData')) {
-                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Login()), (route) => false);
-                            } else {
-                              var id = List<int>();
-                              id.add(book.bookId);
-                              dbHelper.insertOrder(id, name);
-                              Navigator.push(context,
-                                  MaterialPageRoute(
-                                      builder: (context) => OrdersPage()));
-                            }
-                          }));
-                        },
-                        child: Text('BUY NOW',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center),
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            border: Border.all(width: 3, color: Colors.cyan),
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Row(children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (quantity != 0) {
+                                  quantity--;
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              Icons.remove,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          Expanded(
+                              child: Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    quantity.toString(),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ))),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                quantity++;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.add,
+                              color: Colors.greenAccent,
+                            ),
+                          )
+                        ]),
                       ),
                     ),
                     Expanded(
@@ -105,12 +130,17 @@ class DetailsScreen extends StatelessWidget {
                         onPressed: () {
                           final sharedPref = MySharedPreference();
                           String name;
-                          Future.delayed(Duration(seconds: 2),() => sharedPref.getUser().then((value) {
+                          sharedPref.getUser().then((value) {
                             name = value;
-                            print('pressed==$name====');
-                            dbHelper.insertCart(book.bookId,name);
-                          }
-                          ));
+                            if (name == 'noData') {
+                              _showLoginDialog(context);
+                            } else {
+                              Future.delayed(
+                                  Duration(seconds: 1),
+                                  () => dbHelper.insertCart(
+                                      widget.book.bookId, name,quantity));
+                            }
+                          });
                         },
                       ),
                     ),
@@ -123,4 +153,38 @@ class DetailsScreen extends StatelessWidget {
       ),
     );
   }
+
+
+  _showLoginDialog(BuildContext context) async {
+    await showDialog<String>(
+      context: context,
+      child: AlertDialog(
+        contentPadding: const EdgeInsets.all(16.0),
+        content: new Row(
+          children: <Widget>[
+            new Expanded(
+              child: new Text('Please Login To Purchase'),
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          new FlatButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Login()),
+                    (route) => false);
+              })
+        ],
+      ),
+    );
+  }
+
 }
+
