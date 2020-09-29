@@ -1,9 +1,10 @@
-import 'package:book_store/cartlist.dart';
+import 'package:book_store/modals/cartlist.dart';
+import 'package:book_store/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import './book.dart';
-import './db_helper.dart';
-import './shared_preference.dart';
+import '../../modals/book.dart';
+import '../../database/db_helper.dart';
+import '../../shared_preference/shared_preference.dart';
 
 class OrdersPage extends StatefulWidget {
   @override
@@ -126,7 +127,16 @@ class _OrdersPageState extends State<OrdersPage> {
                   alignment: Alignment.center,
                   child: Text('No Orders',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),
                 );
-              })
+              }),
+          Container(
+            margin: EdgeInsets.all(10),
+            child: RaisedButton(
+              onPressed: (){
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> MyBottomNavigationBar()), (route) => false);
+              },
+              child: Text('Back to Shopping'),
+            ),
+          )
         ]),
       ),
     );

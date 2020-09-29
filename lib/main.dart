@@ -1,10 +1,10 @@
-//import 'dart:html';
 
-import 'package:book_store/cart_screen.dart';
-import 'package:book_store/details_screen.dart';
-import 'package:book_store/user_profile.dart';
+import 'package:book_store/screens/cart/cart_screen.dart';
+import 'package:book_store/screens/details/details_screen.dart';
+import 'package:book_store/screens/profile/user_profile.dart';
+import 'package:book_store/theme.dart';
 import 'package:flutter/material.dart';
-import './home.dart';
+import 'screens/home/home.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: theme(),
       home: Scaffold(body: MyBottomNavigationBar()),
     );
   }

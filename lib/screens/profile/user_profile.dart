@@ -1,11 +1,14 @@
-import 'package:book_store/db_helper.dart';
-import 'package:book_store/shared_preference.dart';
-import 'package:book_store/user.dart';
+import 'dart:async';
+
+import 'package:book_store/database/db_helper.dart';
+import 'package:book_store/screens/orders/orders_screen.dart';
+import 'package:book_store/shared_preference/shared_preference.dart';
+import 'package:book_store/modals/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'home.dart';
-import 'login.dart';
+import '../home/home.dart';
+import '../login/login.dart';
 
 class UserProfile extends StatefulWidget {
   @override
@@ -21,11 +24,13 @@ class _UserProfileState extends State<UserProfile> {
   var address;
   var id;
   var user = User();
+  var user1 = User();
 
   //FocusNode nameFocus;
   FocusNode passwordFocus;
   FocusNode emailFocus;
   FocusNode addressFocus;
+  final sharedPref = MySharedPreference();
 
   //TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -42,8 +47,8 @@ class _UserProfileState extends State<UserProfile> {
     dbHelper = DBHelper();
   }
 
+
   Future<User> fetchUser() async {
-    final sharedPref = MySharedPreference();
     await sharedPref.getUser().then((value) {
       check = value;
     });
@@ -64,20 +69,23 @@ class _UserProfileState extends State<UserProfile> {
             onPressed: () {
               updateUser();
               _showDialog(context);
-
+              FocusScope.of(context).unfocus();
+              setState(() {
+                fetchUser().then((value) => user1 = value);
+              });
             },
             child: Text(
               'Save',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white,fontSize: 18),
             ),
-          ),
+          )
         ],
       ),
       body: FutureBuilder(
           future: fetchUser(),
           builder: (context, snapshot) {
             if(snapshot.hasData) {
-              User user = snapshot.data;
+              user1 = snapshot.data;
               return ListView(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
@@ -106,7 +114,8 @@ class _UserProfileState extends State<UserProfile> {
                             //controller: nameController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: user.userName,
+                                hintText: user.userName,
+                                hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.person,
                                   color: Colors.deepPurpleAccent,
@@ -130,7 +139,8 @@ class _UserProfileState extends State<UserProfile> {
                             controller: emailController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: user.userEmail,
+                                hintText: user.userEmail,
+                                hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.email,
                                   color: Colors.redAccent,
@@ -154,7 +164,8 @@ class _UserProfileState extends State<UserProfile> {
                             controller: addressController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: user.userAddress,
+                                hintText: user.userAddress,
+                                hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.home,
                                   color: Colors.teal,
@@ -179,7 +190,8 @@ class _UserProfileState extends State<UserProfile> {
                             controller: passwordController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: 'change password',
+                                hintText: 'change password',
+                                hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.vpn_key,
                                   color: Colors.green,
@@ -197,6 +209,25 @@ class _UserProfileState extends State<UserProfile> {
                         ),
                       ]),
                     ]),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    height: 40,
+                    alignment: Alignment.center,
+                    color: Colors.white,
+                    child: RaisedButton(
+                      color: Colors.blue,
+                      child: Text(
+                        'Your Orders',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                                OrdersPage()));
+                      },
+                    ),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
