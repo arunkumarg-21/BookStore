@@ -24,6 +24,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
   var dbHelper = DBHelper();
   var quantity = 1;
 
+  /*Future<int> numOfItem() async{
+    var sharedPref = MySharedPreference();
+    var name;
+    int items=0;
+    await sharedPref.getUser().then((value) => name=value);
+    await dbHelper.getCart(name).then((value) => value.forEach((element) {++items;}));
+    return items;
+  }*/
+
   @override
   Widget build(BuildContext context) {
     var dbHelper = DBHelper();

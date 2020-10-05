@@ -8,8 +8,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'genre_card.dart';
+import 'genre_list.dart';
 
-class Body extends StatelessWidget {
+class Body extends StatefulWidget {
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
+  var dbHelper = DBHelper();
+
   @override
   Widget build(BuildContext context) {
     return ListView(children: [
@@ -34,25 +42,33 @@ class Body extends StatelessWidget {
                 GenreCard(
                   category: "Thriller",
                   numOfBooks: "10+",
-                  press: () {},
+                  press: () {
+                    fetchBooks().then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => GenreList(title: "Thriller",books: value))));
+                  },
                   image: "assets/images/thriller.jpg",
                 ),
                 GenreCard(
                   category: "Novel",
                   numOfBooks: "10+",
-                  press: () {},
+                  press: () {
+                    fetchBooks().then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => GenreList(title: "Novel",books: value))));
+                  },
                   image: "assets/images/novel.jpg",
                 ),
                 GenreCard(
                   category: "Romance",
                   numOfBooks: "10+",
-                  press: () {},
+                  press: () {
+                    fetchBooks().then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => GenreList(title: "Romance",books: value))));
+                  },
                   image: "assets/images/romance.jpg",
                 ),
                 GenreCard(
                   category: "Fiction",
                   numOfBooks: "10+",
-                  press: () {},
+                  press: () {
+                    fetchBooks().then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => GenreList(title: "Fiction",books: value))));
+                  },
                   image: "assets/images/fiction.jpg",
                 ),
               ]),
@@ -148,9 +164,12 @@ class Body extends StatelessWidget {
   }
 
   Future<List<Book>> fetchBooks() {
-    var dbHelper = DBHelper();
     final books = dbHelper.getBooks();
     return books;
   }
 
+  Future<List<Book>> fetchBookData() async{
+    final books =  dbHelper.getBooks();
+    return books;
+  }
 }

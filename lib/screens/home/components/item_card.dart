@@ -15,7 +15,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: getProportionateScreenWidth(context, 20)),
+      padding: EdgeInsets.only(left: getProportionateScreenWidth(context, 10)),
       child: SizedBox(
         width: getProportionateScreenWidth(context, width),
         child: GestureDetector(

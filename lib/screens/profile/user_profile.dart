@@ -62,8 +62,11 @@ class _UserProfileState extends State<UserProfile> {
     double height = size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
+      backgroundColor: Color(0xFFF5F6F9),
+      /*appBar: AppBar(
+        elevation: 3,
+        backgroundColor: Color(0xFFF5F6F9),
+        title: Text('Profile',style: TextStyle(color: Colors.black),),
         actions: <Widget>[
           FlatButton(
             onPressed: () {
@@ -76,11 +79,11 @@ class _UserProfileState extends State<UserProfile> {
             },
             child: Text(
               'Save',
-              style: TextStyle(color: Colors.white,fontSize: 18),
+              style: TextStyle(color: Colors.black,fontSize: 18),
             ),
           )
         ],
-      ),
+      ),*/
       body: FutureBuilder(
           future: fetchUser(),
           builder: (context, snapshot) {
@@ -91,13 +94,39 @@ class _UserProfileState extends State<UserProfile> {
                 scrollDirection: Axis.vertical,
                 children: [
                   Container(
+                    child: AppBar(
+                      elevation: 3,
+                      backgroundColor: Color(0xFFF5F6F9),
+                      title: Text('Profile',style: TextStyle(color: Colors.black),),
+                      actions: <Widget>[
+                        FlatButton(
+                          onPressed: () {
+                            updateUser();
+                            _showDialog(context);
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              fetchUser().then((value) => user1 = value);
+                            });
+                          },
+                          child: Text(
+                            'Save',
+                            style: TextStyle(color: Colors.black,fontSize: 18),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
                     alignment: Alignment.center,
                     height: height * .35,
                     child: Container(
+                      height: 220,
+                      width: 220,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
+                        shape: BoxShape.circle,
+                          color: Color(0xFFF5F6F9),
                           image: DecorationImage(
-                            image: AssetImage('assets/user.jpg'),
+                            image: AssetImage('assets/images/user.png'),
                             fit: BoxFit.fill,
                           )),
                     ),
@@ -114,7 +143,7 @@ class _UserProfileState extends State<UserProfile> {
                             //controller: nameController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: user.userName,
+                                hintText: user1.userName,
                                 hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.person,
@@ -139,7 +168,7 @@ class _UserProfileState extends State<UserProfile> {
                             controller: emailController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: user.userEmail,
+                                hintText: user1.userEmail,
                                 hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.email,
@@ -164,7 +193,7 @@ class _UserProfileState extends State<UserProfile> {
                             controller: addressController,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: user.userAddress,
+                                hintText: user1.userAddress,
                                 hintStyle: TextStyle(color: Colors.black87),
                                 prefixIcon: Icon(
                                   Icons.home,
@@ -213,59 +242,73 @@ class _UserProfileState extends State<UserProfile> {
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                     height: 40,
-                    alignment: Alignment.center,
-                    color: Colors.white,
-                    child: RaisedButton(
-                      color: Colors.blue,
-                      child: Text(
-                        'Your Orders',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children:[
+                        RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                        color: Colors.blue,
+                        child: Text(
+                          'Your Orders',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>
+                                  OrdersScreen()));
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                OrdersPage()));
-                      },
-                    ),
+                        RaisedButton(
+                          color: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          onPressed: () {
+                            var sharedPref = MySharedPreference();
+                            sharedPref.logOut();
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) =>
+                                    Login()),
+                                    (route) => false);
+                          },
+                        ),
+                    ]),
                   ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    height: 40,
-                    alignment: Alignment.bottomCenter,
-                    color: Colors.white,
-                    child: RaisedButton(
-                      color: Colors.blue,
-                      child: Text(
-                        'Logout',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      onPressed: () {
-                        var sharedPref = MySharedPreference();
-                        sharedPref.logOut();
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                Login()),
-                                (route) => false);
-                      },
-                    ),
-                  )
                 ],
               );
             }
-            return Container(
-              alignment: Alignment.center,
-              child: RaisedButton(
-                onPressed: (){
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Login()),
-                          (route) => false);
-                },
-                child: Text('Login',style: TextStyle(fontWeight: FontWeight.bold),),
-              ),
+            return Column(
+              children: [
+                AppBar(
+                  elevation: 3,
+                  backgroundColor: Color(0xFFF5F6F9),
+                  title: Text('Profile',style: TextStyle(color: Colors.black),)
+                ),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: RaisedButton(
+                      color: Colors.blueGrey,
+                      onPressed: (){
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Login()),
+                                (route) => false);
+                      },
+                      child: Text('Login',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
+                    ),
+                  ),
+                ),
+              ],
             );
           }),
 
@@ -310,15 +353,14 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void updateUser() {
-    email = emailController.text == null? user.userEmail : emailController.text;
-    password = passwordController.text == null? user.userPassword : passwordController.text ;
-    address = addressController.text == null? user.userAddress : addressController.text;
+    email = emailController.text == ''? user.userEmail : emailController.text;
+    password = passwordController.text == ''? user.userPassword : passwordController.text ;
+    address = addressController.text == ''? user.userAddress : addressController.text;
     User user1 = User(
         userId: user.userId,
         userName: user.userName,
         userEmail: email,
-        userPassword: password,
-        userAddress: address);
+        userPassword: password,);
     dbHelper.updateUser(user1);
   }
 }

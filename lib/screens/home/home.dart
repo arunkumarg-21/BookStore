@@ -1,16 +1,12 @@
 import 'package:book_store/screens/cart/cart_screen.dart';
-import 'package:book_store/screens/details/details_screen.dart';
 import 'package:book_store/screens/home/components/body.dart';
 import 'package:book_store/screens/home/components/icon_button.dart';
-import 'package:book_store/screens/home/components/item_card.dart';
-import 'package:book_store/shared_preference/shared_preference.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../constants.dart';
 import '../../modals/book.dart';
 import '../../database/db_helper.dart';
-import '../login/login.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -21,7 +17,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Book> books;
   bool isSearching = false;
   var dbHelper;
-  int _currentIndex;
 
   @override
   void initState() {
@@ -234,29 +229,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   fontWeight: FontWeight.bold,
                   fontSize: 20),),
             backgroundColor: Color(0xFFF5F6F9),
-            /*flexibleSpace: Center(
-                child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 1,
-                            child: ,
-                          ),
-                          Expanded(
-                            flex: 8,
-                            child: Container(
-                              padding: EdgeInsets.only(left: 16, top: 16),
-                              child: Text(AppName,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )),*/
             actions: [
               IconBtnWithCounter(
                 numOfitem: 0,
@@ -266,98 +238,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           body: Body(),
-        /*Column(
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: FutureBuilder<List<Book>>(
-                    future: fetchBookData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return GridView.builder(
-                            itemCount: snapshot.data.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount:
-                                        (orientation == Orientation.portrait)
-                                            ? 2
-                                            : 3,
-                                    childAspectRatio: itemWidth/itemHeight,
-                                    crossAxisSpacing: 20,
-                                    mainAxisSpacing: 20),
-                            itemBuilder: (context, index) {
-                              Book book = snapshot.data[index];
-                              return ItemCard(
-                                  book: book,
-                                  //cartPress: () => insertCart(context,book),
-                                  press: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              DetailsScreen(book: book))));
 
-                            });
-                      }
-                      return Center(child: CircularProgressIndicator());
-                    },
-                  ),
-                ),
-              )
-            ],
-          ),*/
       ),
     );
   }
 
-
-  /*Future<List<Book>> fetchBookData() {
-    final books = dbHelper.getBooks();
-    return books;
-  }*/
-
-  /*insertCart(BuildContext context,Book book) async{
-    var name;
+ /* Future<int> numOfItem() async{
     var sharedPref = MySharedPreference();
-    await sharedPref.getUser().then((value) => name = value);
-    if(name == 'noDate' || null){
-      _showLoginDialog(context);
-    }else{
-      await dbHelper.insertCart(book.bookId,name);
-    }
-
-  }
-*/
- /* _showLoginDialog(BuildContext context) async {
-    await showDialog<String>(
-      context: context,
-      child: AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
-        content: new Row(
-          children: <Widget>[
-            new Expanded(
-              child: new Text('Please Login To Purchase'),
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => Login()),
-                        (route) => false);
-              })
-        ],
-      ),
-    );
+    var name;
+    int items=0;
+    await sharedPref.getUser().then((value) => name=value);
+    await dbHelper.getCart(name).then((value) => value.forEach((element) {++items;}));
+    return items;
   }*/
+
+
 
 
 }

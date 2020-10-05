@@ -5,9 +5,8 @@ class User{
   final String userEmail;
   final String userPassword;
   final String userAddress;
-  final String userAddress1;
 
-  User({this.userId,this.userName,this.userEmail,this.userPassword,this.userAddress,this.userAddress1});
+  User({this.userId,this.userName,this.userEmail,this.userPassword,this.userAddress});
 
   Map<String,dynamic> userToMap(){
     var map = <String,dynamic>{
@@ -16,7 +15,6 @@ class User{
       'email' : userEmail,
       'password' : userPassword,
       'Address' : userAddress,
-      'Address1' : userAddress1
     };
     return map;
   }

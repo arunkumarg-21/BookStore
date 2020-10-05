@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'package:book_store/modals/address_list.dart';
 import 'package:book_store/modals/cartlist.dart';
 import 'package:book_store/modals/user.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,8 @@ class DBHelper {
   static const String BOOK_TABLE = 'Books';
   static const String USER_TABLE = 'Users';
   static const String USER_ADDRESS = 'Address';
-  static const String USER_ADDRESS1 = 'Address1';
+  static const String DELIVERY_ADDRESS = 'DeliveryAddress';
+  static const String USER_ADDRESS_TABLE = 'AddressTable';
   static const String CART_TABLE = 'Cart';
   static const String ORDER_TABLE = 'OrderTable';
   static const String ORDER_ID = 'OrderId';
@@ -48,10 +50,11 @@ class DBHelper {
   }
 
   _onCreate(Database db,int version) async {
-    await db.execute("CREATE TABLE $BOOK_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$DESCRIPTION TEXT,$PRICE INTEGER,$RATING REAL,$IMAGE TEXT)");
+    await db.execute("CREATE TABLE $BOOK_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT UNIQUE,$DESCRIPTION TEXT,$PRICE INTEGER,$RATING REAL,$IMAGE TEXT)");
+    await db.execute(("CREATE TABLE $USER_ADDRESS_TABLE($ID INTEGER PRIMARY KEY,$USER_NAME TEXT,$DELIVERY_ADDRESS TEXT,$USER_ADDRESS TEXT)"));
     await db.execute("CREATE TABLE $CART_TABLE($CART_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
     await db.execute("CREATE TABLE $ORDER_TABLE($ORDER_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
-    await db.execute("CREATE TABLE $USER_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$EMAIL TEXT,$PASSWORD TEXT,$USER_ADDRESS TEXT,$USER_ADDRESS1 TEXT)");
+    await db.execute("CREATE TABLE $USER_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$EMAIL TEXT,$PASSWORD TEXT,$USER_ADDRESS TEXT)");
   }
 
    Future<Book> saveBook(Book book) async {
@@ -79,18 +82,46 @@ class DBHelper {
     return i;
   }
 
+  insertAddress(AddressList addressList) async{
+    var dbClient = await db;
+    //await dbClient.rawQuery("ALTER TABLE $USER_ADDRESS_TABLE ALTER $DELIVERY_ADDRESS SET DEFAULT ${addressList.deliveryAddress}");
+    int id = await dbClient.insert(USER_ADDRESS_TABLE, addressList.toMap());
+  }
+
   Future<List<String>> getUserAddress(String name) async{
     var dbClient = await db;
     var address = List<String>();
-    List<Map> map = await dbClient.query(USER_TABLE,where: "$NAME = ?",whereArgs: [name]);
+    List<Map> map = await dbClient.query(USER_ADDRESS_TABLE,where: "$USER_NAME = ?",whereArgs: [name]);
     if(map.isEmpty){
       return null;
     }
     map.forEach((element) {
-      address.add(element[USER_ADDRESS]);
-      address.add(element[USER_ADDRESS1]);
+      if(element['$USER_ADDRESS'] == null){
+        return null;
+      }
+      address.add(element['$USER_ADDRESS']);
+      //address.add(element[USER_ADDRESS1]);
     });
-    print('address===${address[1]}');
+    print('address===$address');
+    return address;
+  }
+  Future<int> updateUserAddress(String address,String name) async{
+    var dbClient  = await db;
+    int id = await dbClient.rawUpdate('UPDATE $USER_ADDRESS_TABLE SET $DELIVERY_ADDRESS = ? WHERE $USER_NAME = ?',[address,name]);
+    return id;
+  }
+  
+
+  Future<String> getDeliveyAddress(String name) async{
+    var dbClient = await db;
+    var address;
+    List<Map> map = await dbClient.query(USER_ADDRESS_TABLE,where: "$USER_NAME = ?",whereArgs: [name]);
+    if(map.isEmpty)
+      return '';
+    map.forEach((element) {
+      address = element['$DELIVERY_ADDRESS'];
+    });
+    print('deliveryaddress====$address');
     return address;
   }
 
@@ -136,11 +167,11 @@ class DBHelper {
 
   Future<User> getUser(String name) async{
     var dbClient = await db;
-    List<Map> map = await dbClient.query(USER_TABLE,where: "name = ?" ,whereArgs: [name]);
+    List<Map> map = await dbClient.rawQuery("SELECT $USER_TABLE.*,$USER_ADDRESS_TABLE.$DELIVERY_ADDRESS FROM $USER_TABLE LEFT JOIN $USER_ADDRESS_TABLE ON $USER_TABLE.$NAME = $USER_ADDRESS_TABLE.$USER_NAME WHERE $NAME = ?",[name]);
     User user;
       map.forEach((element) {
         user = User(
-            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email'],userAddress: element[USER_ADDRESS]);
+            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email'],userAddress: element['$DELIVERY_ADDRESS']);
       });
     return user;
   }

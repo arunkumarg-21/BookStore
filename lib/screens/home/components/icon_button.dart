@@ -8,7 +8,7 @@ class IconBtnWithCounter extends StatelessWidget {
   const IconBtnWithCounter({
     Key key,
     @required this.svgSrc,
-    this.numOfitem = 0,
+    this.numOfitem,
     @required this.press,
   }) : super(key: key);
 
@@ -28,10 +28,10 @@ class IconBtnWithCounter extends StatelessWidget {
             padding: EdgeInsets.all(getProportionateScreenWidth(context,12)),
             height: getProportionateScreenWidth(context,46),
             width: getProportionateScreenWidth(context,46),
-            decoration: BoxDecoration(
+            /*decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-            ),
+            ),*/
             child: SvgPicture.asset(svgSrc),
           ),
           if (numOfitem != 0)
