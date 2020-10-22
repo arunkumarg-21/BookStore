@@ -128,6 +128,7 @@ class RegisterState extends State<Register>{
                                       Container(
                                         margin: EdgeInsets.only(top: 10,bottom: 10),
                                         child: TextFormField(
+                                          obscureText: true,
                                           controller: passwordController,
                                           onSaved: (val) => password = val,
                                           validator: (val) => val.isEmpty?'Error':null,

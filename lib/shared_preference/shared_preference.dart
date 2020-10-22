@@ -17,7 +17,6 @@ class MySharedPreference{
     final sharedPreferences = await SharedPreferences.getInstance();
     String userCred;
     userCred = (sharedPreferences.getString('name')??"noData");
-    print('username===$userCred');
     return userCred;
   }
 

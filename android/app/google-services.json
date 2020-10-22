@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "232124666859",
+    "firebase_url": "https://bookstore-flutter.firebaseio.com",
+    "project_id": "bookstore-flutter",
+    "storage_bucket": "bookstore-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232124666859:android:14bfbacf00f4995a757fae",
+        "android_client_info": {
+          "package_name": "com.example.book_store"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "232124666859-a815ps4mhp10i0s5pqeme9nqflv6uo8e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.book_store",
+            "certificate_hash": "c05e366756155b9ba1955d6d85fc7ef8161852f0"
+          }
+        },
+        {
+          "client_id": "232124666859-t93svb94pmi7ihiv3gdjqg18q584fbp1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKuiR1J1ps5Bv8keYwnAUDYdCW4ndXDY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "232124666859-t93svb94pmi7ihiv3gdjqg18q584fbp1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

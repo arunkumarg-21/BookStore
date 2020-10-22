@@ -31,6 +31,7 @@ class DBHelper {
   static const String CART_ID = 'CartId';
   static const String BOOK_ID = 'BookId';
   static const String USER_NAME = 'UserName';
+  static const String USER_IMAGE = 'UserImage';
   static const String DB_NAME = 'books1.db';
 
   Future<Database> get db async{
@@ -54,7 +55,7 @@ class DBHelper {
     await db.execute(("CREATE TABLE $USER_ADDRESS_TABLE($ID INTEGER PRIMARY KEY,$USER_NAME TEXT,$DELIVERY_ADDRESS TEXT,$USER_ADDRESS TEXT)"));
     await db.execute("CREATE TABLE $CART_TABLE($CART_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
     await db.execute("CREATE TABLE $ORDER_TABLE($ORDER_ID INTEGER PRIMARY KEY,$BOOK_ID INTEGER,$USER_NAME TEXT,$QUANTITY INTEGER)");
-    await db.execute("CREATE TABLE $USER_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$EMAIL TEXT,$PASSWORD TEXT,$USER_ADDRESS TEXT)");
+    await db.execute("CREATE TABLE $USER_TABLE($ID INTEGER PRIMARY KEY,$NAME TEXT,$EMAIL TEXT,$PASSWORD TEXT,$USER_ADDRESS TEXT,$USER_IMAGE TEXT)");
   }
 
    Future<Book> saveBook(Book book) async {
@@ -110,6 +111,12 @@ class DBHelper {
     int id = await dbClient.rawUpdate('UPDATE $USER_ADDRESS_TABLE SET $DELIVERY_ADDRESS = ? WHERE $USER_NAME = ?',[address,name]);
     return id;
   }
+
+  Future<int> updateUserImage(int id,String image) async{
+    var dbClient  = await db;
+    int i = await dbClient.rawUpdate('UPDATE $USER_TABLE SET $USER_IMAGE = ? WHERE $ID = ?',[image,id]);
+    return i;
+  }
   
 
   Future<String> getDeliveyAddress(String name) async{
@@ -121,7 +128,6 @@ class DBHelper {
     map.forEach((element) {
       address = element['$DELIVERY_ADDRESS'];
     });
-    print('deliveryaddress====$address');
     return address;
   }
 
@@ -171,14 +177,20 @@ class DBHelper {
     User user;
       map.forEach((element) {
         user = User(
-            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email'],userAddress: element['$DELIVERY_ADDRESS']);
+            userId: element['id'], userName: element['name'], userPassword: element['password'],userEmail: element['email'],userAddress: element['$DELIVERY_ADDRESS'],userImage: element['$USER_IMAGE']);
       });
     return user;
   }
 
-  Future<int> updateUser(User user) async{
+  /*Future<int> updateUser(User user) async{
     var dbClient  = await db;
     int id = await dbClient.update(USER_TABLE, user.userToMap(),where: 'id = ?',whereArgs: [user.userId]);
+    return id;
+  }*/
+  Future<int> updateUser(User user) async{
+    var dbClient  = await db;
+    int id = await dbClient.rawUpdate("UPDATE $USER_TABLE SET $NAME = ?,$EMAIL = ?,$PASSWORD =?,$USER_IMAGE = ? WHERE $ID = ?",[user.userName,user.userEmail,user.userPassword,user.userImage,user.userId]);
+    int ad = await dbClient.rawUpdate("UPDATE $USER_ADDRESS_TABLE SET $DELIVERY_ADDRESS = ? WHERE $USER_NAME = ?",[user.userAddress,user.userName]);
     return id;
   }
 

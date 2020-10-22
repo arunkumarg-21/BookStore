@@ -2,6 +2,7 @@ import 'package:book_store/bottom_nav/bottom_navigation.dart';
 import 'package:book_store/database/db_helper.dart';
 import 'package:book_store/screens/home/home.dart';
 import 'package:book_store/main.dart';
+import 'package:book_store/screens/login/forgot_password.dart';
 import 'package:book_store/screens/login/register.dart';
 import 'package:book_store/shared_preference/shared_preference.dart';
 import 'package:book_store/modals/user.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
+  static String routeName = '/login';
   @override
   State<StatefulWidget> createState() {
     return LoginState();
@@ -71,7 +73,7 @@ class LoginState extends State<Login> {
                 left: 15,
                 right: 15,
                 child: Container(
-                  height: 370,
+                  height: 420,
                   width: width - 40,
                   margin: EdgeInsets.only(left: 20, right: 20, top: 0),
                   padding: EdgeInsets.all(20),
@@ -115,6 +117,7 @@ class LoginState extends State<Login> {
                             margin: EdgeInsets.only(top: 10, bottom: 10),
                             child: TextFormField(
                               controller: passwordController,
+                              obscureText: true,
                               validator: (val) =>
                                   val.length == 0 ? 'Invalid password' : null,
                               onSaved: (val) => password = val,
@@ -125,6 +128,13 @@ class LoginState extends State<Login> {
                                 labelText: 'Password',
                               ),
                             ),
+                          ),
+
+                          FlatButton(
+                            onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPassword()));
+                            },
+                            child: Text("Forgot Password?",style: TextStyle(color: Colors.blue,decoration: TextDecoration.underline),                            ),
                           ),
                           Container(
                             alignment: Alignment.center,

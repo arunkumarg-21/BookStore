@@ -1,52 +1,47 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:book_store/database/db_helper.dart';
 import 'package:book_store/screens/orders/orders_screen.dart';
+import 'package:book_store/screens/profile/profile_edit.dart';
 import 'package:book_store/shared_preference/shared_preference.dart';
 import 'package:book_store/modals/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../../size_config.dart';
 import '../home/home.dart';
 import '../login/login.dart';
 
 class UserProfile extends StatefulWidget {
+  static String routeName = '/profile';
+
   @override
   _UserProfileState createState() => _UserProfileState();
 }
 
 class _UserProfileState extends State<UserProfile> {
+  File _image;
+  final picker = ImagePicker();
+  String base64;
+
   var dbHelper;
-  var name;
   var check;
-  var password;
-  var email;
-  var address;
-  var id;
   var user = User();
   var user1 = User();
 
-  //FocusNode nameFocus;
-  FocusNode passwordFocus;
-  FocusNode emailFocus;
-  FocusNode addressFocus;
   final sharedPref = MySharedPreference();
-
-  //TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    //nameFocus = FocusNode();
-    passwordFocus = FocusNode();
-    emailFocus = FocusNode();
-    addressFocus = FocusNode();
     dbHelper = DBHelper();
   }
-
 
   Future<User> fetchUser() async {
     await sharedPref.getUser().then((value) {
@@ -56,6 +51,66 @@ class _UserProfileState extends State<UserProfile> {
     return user;
   }
 
+  getImage(BuildContext context) async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: Text('Select your choice'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () async {
+                  final pickedFile =
+                      await picker.getImage(source: ImageSource.gallery);
+
+                  if (pickedFile == null) {
+                    return;
+                  }
+                  File tmpFile = File(pickedFile.path);
+                  final Directory dir =
+                      await getApplicationDocumentsDirectory();
+                  final String path = dir.path;
+                  final String fileName =
+                      basename(pickedFile.path); // Filename without extension
+                  final String fileExtension = extension(pickedFile.path);
+                  tmpFile = await tmpFile.copy('$path/$fileName$fileExtension');
+                  dbHelper.updateUserImage(user.userId, tmpFile.path);
+                  setState(() {});
+
+                  Navigator.pop(context);
+                },
+                child: Text('Gallery'),
+              ),
+              SimpleDialogOption(
+                onPressed: () async {
+                  final pickedFile =
+                      await picker.getImage(source: ImageSource.camera);
+
+                  if (pickedFile == null) {
+                    return;
+                  } else {
+                    File tmpFile = File(pickedFile.path);
+                    final Directory dir =
+                        await getApplicationDocumentsDirectory();
+                    final String path = dir.path;
+                    final String fileName =
+                        basename(pickedFile.path); // Filename without extension
+                    final String fileExtension = extension(pickedFile.path);
+                    tmpFile =
+                        await tmpFile.copy('$path/$fileName$fileExtension');
+                    dbHelper.updateUserImage(user.userId, tmpFile.path);
+                    setState(() {});
+
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Camera'),
+              )
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -63,31 +118,10 @@ class _UserProfileState extends State<UserProfile> {
 
     return Scaffold(
       backgroundColor: Color(0xFFF5F6F9),
-      /*appBar: AppBar(
-        elevation: 3,
-        backgroundColor: Color(0xFFF5F6F9),
-        title: Text('Profile',style: TextStyle(color: Colors.black),),
-        actions: <Widget>[
-          FlatButton(
-            onPressed: () {
-              updateUser();
-              _showDialog(context);
-              FocusScope.of(context).unfocus();
-              setState(() {
-                fetchUser().then((value) => user1 = value);
-              });
-            },
-            child: Text(
-              'Save',
-              style: TextStyle(color: Colors.black,fontSize: 18),
-            ),
-          )
-        ],
-      ),*/
       body: FutureBuilder(
           future: fetchUser(),
           builder: (context, snapshot) {
-            if(snapshot.hasData) {
+            if (snapshot.hasData) {
               user1 = snapshot.data;
               return ListView(
                 shrinkWrap: true,
@@ -97,190 +131,160 @@ class _UserProfileState extends State<UserProfile> {
                     child: AppBar(
                       elevation: 3,
                       backgroundColor: Color(0xFFF5F6F9),
-                      title: Text('Profile',style: TextStyle(color: Colors.black),),
+                      title: Text(
+                        'Profile',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       actions: <Widget>[
                         FlatButton(
                           onPressed: () {
-                            updateUser();
-                            _showDialog(context);
-                            FocusScope.of(context).unfocus();
-                            setState(() {
-                              fetchUser().then((value) => user1 = value);
-                            });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ProfileEdit(user: user1)));
                           },
                           child: Text(
-                            'Save',
-                            style: TextStyle(color: Colors.black,fontSize: 18),
+                            'Edit',
+                            style: TextStyle(color: Colors.black, fontSize: 18),
                           ),
                         )
                       ],
                     ),
                   ),
-                  Container(
-                    alignment: Alignment.center,
-                    height: height * .35,
+                  GestureDetector(
+                    onTap: () => getImage(context),
                     child: Container(
-                      height: 220,
-                      width: 220,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                          color: Color(0xFFF5F6F9),
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/user.png'),
-                            fit: BoxFit.fill,
-                          )),
+                      alignment: Alignment.center,
+                      height: height * .35,
+                      child: Stack(children: [
+                        CircleAvatar(
+                          radius: 85,
+                          backgroundColor: Colors.blueAccent,
+                          child: CircleAvatar(
+                              radius: 80,
+                              backgroundImage: user1.userImage == null
+                                  ? AssetImage('assets/images/user.png')
+                                  : FileImage(File(user1.userImage))),
+                        ),
+                        Positioned(
+                          bottom: 9,
+                          right: 9,
+                          child: Container(
+                            height: getProportionateScreenWidth(context, 26),
+                            width: getProportionateScreenWidth(context, 26),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFFF4848),
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(width: 1.5, color: Colors.white),
+                            ),
+                            child: Center(
+                                child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            )),
+                          ),
+                        )
+                      ]),
+                      padding: EdgeInsets.all(16),
                     ),
-                    padding: EdgeInsets.all(16),
                   ),
                   Container(
                     //height: height / 2,
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                     child: Column(children: [
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-                        Expanded(
-                          child: TextField(
-                            readOnly: true,
-                            //controller: nameController,
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: user1.userName,
-                                hintStyle: TextStyle(color: Colors.black87),
-                                prefixIcon: Icon(
-                                  Icons.person,
-                                  color: Colors.deepPurpleAccent,
-                                )),
-                          ),
+                      TextField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: user1.userName,
+                            hintStyle: TextStyle(color: Colors.black87),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Colors.deepPurpleAccent,
+                            )),
+                      ),
+                      TextField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: user1.userEmail,
+                            hintStyle: TextStyle(color: Colors.black87),
+                            prefixIcon: Icon(
+                              Icons.email,
+                              color: Colors.redAccent,
+                            )),
+                      ),
+                      TextField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: user1.userAddress,
+                            hintStyle: TextStyle(color: Colors.black87),
+                            prefixIcon: Icon(
+                              Icons.home,
+                              color: Colors.teal,
+                            )),
+                      ),
+                      GestureDetector(
+                        onTap: () {},
+                        child: TextField(
+                          obscureText: true,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'change password',
+                              hintStyle: TextStyle(color: Colors.blueAccent),
+                              prefixIcon: Icon(
+                                Icons.vpn_key,
+                                color: Colors.green,
+                              )),
                         ),
-                        /*IconButton(
-                          icon: Icon(
-                            Icons.edit,
-                            color: Colors.black87,
-                          ),
-                          onPressed: () {
-                            //nameFocus.requestFocus();
-                          },
-                        ),*/
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          child: TextField(
-                            focusNode: emailFocus,
-                            controller: emailController,
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: user1.userEmail,
-                                hintStyle: TextStyle(color: Colors.black87),
-                                prefixIcon: Icon(
-                                  Icons.email,
-                                  color: Colors.redAccent,
-                                )),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit,
-                            color: Colors.black87,
-                          ),
-                          onPressed: () {
-                            emailFocus.requestFocus();
-                          },
-                        ),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          child: TextField(
-                            focusNode: addressFocus,
-                            controller: addressController,
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: user1.userAddress,
-                                hintStyle: TextStyle(color: Colors.black87),
-                                prefixIcon: Icon(
-                                  Icons.home,
-                                  color: Colors.teal,
-                                )),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit,
-                            color: Colors.black87,
-                          ),
-                          onPressed: () {
-                            addressFocus.requestFocus();
-                          },
-                        ),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          child: TextField(
-                            obscureText: true,
-                            focusNode: passwordFocus,
-                            controller: passwordController,
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'change password',
-                                hintStyle: TextStyle(color: Colors.black87),
-                                prefixIcon: Icon(
-                                  Icons.vpn_key,
-                                  color: Colors.green,
-                                )),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit,
-                            color: Colors.black87,
-                          ),
-                          onPressed: () {
-                            passwordFocus.requestFocus();
-                          },
-                        ),
-                      ]),
+                      ),
                     ]),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                     height: 40,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children:[
-                        RaisedButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          RaisedButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            color: Colors.blue,
+                            child: Text(
+                              'Your Orders',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => OrdersScreen()));
+                            },
                           ),
-                        color: Colors.blue,
-                        child: Text(
-                          'Your Orders',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>
-                                  OrdersScreen()));
-                        },
-                      ),
-                        RaisedButton(
-                          color: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)
+                          RaisedButton(
+                            color: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Text(
+                              'Logout',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            onPressed: () {
+                              var sharedPref = MySharedPreference();
+                              sharedPref.logOut();
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Login()),
+                                  (route) => false);
+                            },
                           ),
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          onPressed: () {
-                            var sharedPref = MySharedPreference();
-                            sharedPref.logOut();
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) =>
-                                    Login()),
-                                    (route) => false);
-                          },
-                        ),
-                    ]),
+                        ]),
                   ),
                 ],
               );
@@ -288,79 +292,34 @@ class _UserProfileState extends State<UserProfile> {
             return Column(
               children: [
                 AppBar(
-                  elevation: 3,
-                  backgroundColor: Color(0xFFF5F6F9),
-                  title: Text('Profile',style: TextStyle(color: Colors.black),)
-                ),
+                    elevation: 3,
+                    backgroundColor: Color(0xFFF5F6F9),
+                    title: Text(
+                      'Profile',
+                      style: TextStyle(color: Colors.black),
+                    )),
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
                     child: RaisedButton(
                       color: Colors.blueGrey,
-                      onPressed: (){
+                      onPressed: () {
                         Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => Login()),
-                                (route) => false);
+                            MaterialPageRoute(builder: (context) => Login()),
+                            (route) => false);
                       },
-                      child: Text('Login',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               ],
             );
           }),
-
     );
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    //nameFocus.dispose();
-    passwordFocus.dispose();
-    emailFocus.dispose();
-    addressFocus.dispose();
-    //nameController.dispose();
-    passwordController.dispose();
-    emailController.dispose();
-    addressController.dispose();
-  }
-
-  _showDialog(BuildContext context) async {
-    await showDialog<String>(
-      context: context,
-      child: AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
-        content: Row(
-          children: <Widget>[
-            Expanded(
-              child: Text('User Updated.'),
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          FlatButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(context);
-              })
-        ],
-      ),
-    );
-  }
-
-  void updateUser() {
-    email = emailController.text == ''? user.userEmail : emailController.text;
-    password = passwordController.text == ''? user.userPassword : passwordController.text ;
-    address = addressController.text == ''? user.userAddress : addressController.text;
-    User user1 = User(
-        userId: user.userId,
-        userName: user.userName,
-        userEmail: email,
-        userPassword: password,);
-    dbHelper.updateUser(user1);
   }
 }
