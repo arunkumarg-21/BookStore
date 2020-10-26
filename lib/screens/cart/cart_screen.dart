@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:book_store/Response/response.dart';
 import 'package:book_store/database/db_helper.dart';
 import 'package:book_store/screens/cart/firebase_demo.dart';
+import 'package:book_store/screens/payment_response/payment_response.dart';
 import 'package:book_store/screens/user_address/user_address.dart';
 import 'package:book_store/shared_preference/shared_preference.dart';
 import 'package:book_store/screens/profile/user_profile.dart';
@@ -439,8 +440,8 @@ class _CartScreenState extends State<CartScreen> {
                 dbHelper.deleteUserCart(name);
                 Navigator.popAndPushNamed(context, OrdersScreen.routeName);
               }else{
-                Navigator.pop(context);
-                Scaffold.of(context).showSnackBar(SnackBar(content: Text('Payment Failed',)));
+                Navigator.popAndPushNamed(context, PaymentFailed.routeName);
+                //Scaffold.of(context).showSnackBar(SnackBar(content: Text('Payment Failed',)));
               }
 
             },

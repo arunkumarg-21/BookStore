@@ -1,6 +1,8 @@
 const functions = require('firebase-functions');
  admin = require('firebase-admin');
 
+ admin.initializeApp();
+
 exports.messageTrigger = functions.firestore.document('Messages/{messageId}').onCreate(async (snapshot,context) => {
 if(snapshot.empty){
 console.log('no message');
@@ -17,7 +19,7 @@ var tokens = [];
 
 newData = snapshot.data();
 var payload = {
-  notification : {title:'Push Title',body:'Push Body'},
+  notification : {title:'Message From BookStore',body:newData.message},
   data: {click_action:'FLUTTER_NOTIFICATION_CLICK', message: newData.message},
 };
 

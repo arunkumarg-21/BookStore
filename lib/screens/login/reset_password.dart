@@ -17,15 +17,18 @@ class ResetPassword extends StatelessWidget {
     var confirmPassword;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Change Password"),
+        title: Text("Change Password",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+        elevation: 3,
       ),
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Text("Enter New Password"),
+          Container(
+            margin: EdgeInsets.all(10),
+            alignment: Alignment.centerLeft,
+            child: Text("Enter a Password to change",style: TextStyle(color: Colors.black87,fontSize: 18),),
           ),
           Container(
+            margin: EdgeInsets.all(10),
             child: TextField(
               controller: _newPassword,
               onChanged: (val) => newPassword = val,
@@ -40,6 +43,7 @@ class ResetPassword extends StatelessWidget {
             ),
           ),
           Container(
+            margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: TextField(
               controller: _confirmPassword,
               onChanged: (val) => confirmPassword = val,

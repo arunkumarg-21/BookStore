@@ -17,15 +17,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     var _userName;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Forgot Password"),
+        title: Text("Forgot Password",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+        elevation: 3,
       ),
       body: Column(
         children: [
           Container(
-            margin: EdgeInsets.all(16),
-            alignment: Alignment.centerRight,
+            margin: EdgeInsets.all(10),
+            alignment: Alignment.centerLeft,
+            child: Text("Enter the User Id used for Registration",style: TextStyle(color: Colors.black87,fontSize: 18),),
           ),
           Container(
+            margin: EdgeInsets.fromLTRB(10,0,10,10),
             child: TextField(
               controller: _controller,
               onChanged: (val) => _userName = val,
