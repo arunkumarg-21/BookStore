@@ -45,7 +45,7 @@ class _CartScreenState extends State<CartScreen> {
 
 
   Future<ResponseResult> getResponse(String orderId,String amount) async{
-    final response = await http.post('https://bookstoreflutter.000webhostapp.com/Paytm_PHP_Checksum-master/sam.php',
+    final response = await http.post('YOUR-SERVER-WEBSITE-TO-GET-RESPONSE',
         body: <String,String>{
           "orderId" : orderId,
           "amount" : amount
@@ -457,7 +457,7 @@ class _CartScreenState extends State<CartScreen> {
     ResponseResult res = await getResponse(orderId,amount);
     String body = res.body.txnToken;
     var sendMap = <String,dynamic>{
-      "mid" : "CbArUD06457943921127",
+      "mid" : "YOUR_PAYTM_MID",
       "amount": amount,
       "token" : body,
       "orderId":orderId
